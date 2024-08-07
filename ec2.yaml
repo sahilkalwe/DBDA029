@@ -1,27 +1,27 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: create ec2 instance
+Description: Create an EC2 instance, an S3 bucket, and an EMR Cluster
 
 Resources:
   WebAppInstance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: ami-0d5eff06f840b45e9 # ImageID valid only in us-east-1 region
+      ImageId: ami-0d5eff06f840b45e9  # ImageID valid only in us-east-1 region
       InstanceType: t2.micro
-
-  S3Bucket:
+      Tags:
+        - Key: Name
+          Value: Vita
+  
+  WebAppBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName:!Sub "my-unique-bucket-${AWS::AccountId}-${AWS::Region}"
-  
-  EMRCluster:
+      BucketName: vita1234-unique  # Ensure this bucket name is globally unique
+
+  # Example of adding an EMR Cluster
+  MyEMRCluster:
     Type: AWS::EMR::Cluster
     Properties:
-      Name: "MyEMRCluster"
-      LogUri:!Sub "s3://${S3Bucket}/logs/"
-      ReleaseLabel: "emr-6.4.0"
-      Applications:
-        - Name: "Hadoop"
-        - Name: "Spark"
+      Name: MyCluster
+      ReleaseLabel: emr-6.4.0
       Instances:
         MasterInstanceGroup:
           InstanceCount: 1
@@ -29,10 +29,11 @@ Resources:
         CoreInstanceGroup:
           InstanceCount: 2
           InstanceType: m5.xlarge
-      JobFlowRole: "EMR_EC2_DefaultRole" # Ensure this role exists or create it
-      ServiceRole: "EMR_DefaultRole" # Ensure this role exists or create it
+        TerminationProtected: false
+      Applications:
+        - Name: Hadoop
+        - Name: Spark
       VisibleToAllUsers: true
-      EbsRootVolumeSize: 32
-      Tags:
-        - Key: "Name"
-          Value: "MyEMRCluster"
+      LogUri: !Sub 's3://${WebAppBucket}/logs/'
+      JobFlowRole: EMR_EC2_DefaultRole
+      ServiceRole: EMR_DefaultRole
