@@ -11,13 +11,13 @@ Resources:
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: | Sub "my-unique-bucket-${AWS::AccountId}-${AWS::Region}"
+      BucketName:!Sub "my-unique-bucket-${AWS::AccountId}-${AWS::Region}"
   
   EMRCluster:
     Type: AWS::EMR::Cluster
     Properties:
       Name: "MyEMRCluster"
-      LogUri: | Sub "s3://${S3Bucket}/logs/"
+      LogUri:!Sub "s3://${S3Bucket}/logs/"
       ReleaseLabel: "emr-6.4.0"
       Applications:
         - Name: "Hadoop"
