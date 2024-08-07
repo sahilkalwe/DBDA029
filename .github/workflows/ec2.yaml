@@ -1,25 +1,43 @@
-name: create a ec2 instance
+name: Deploy EC2, S3, and EMR Resources
 on:
   push:
     branches: [ main ]
 
 jobs:
   Deployment:
-    name: create EC2 Instance
+    name: Create EC2 Instance, S3 Bucket, and EMR Cluster
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout the code
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
       - uses: actions/setup-python@v2
         with:
           python-version: '3.7'
+      
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install awscli
-      - run: aws cloudformation create-stack --stack-name ec2-example --template-body file://ec2.yaml
+      
+      - name: Create or Update CloudFormation Stack
+        run: |
+          STACK_NAME="my-stack"
+          TEMPLATE_FILE="file://ec2.yaml"
+          
+          # Check if the stack exists
+          STACK_EXISTS=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].StackName" --output text 2>&1 || echo "")
+
+          if [ "$STACK_EXISTS" == "$STACK_NAME" ]; then
+            # Stack exists, update it
+            echo "Updating stack $STACK_NAME"
+            aws cloudformation update-stack --stack-name $STACK_NAME --template-body $TEMPLATE_FILE --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
+          else
+            # Stack does not exist, create it
+            echo "Creating stack $STACK_NAME"
+            aws cloudformation create-stack --stack-name $STACK_NAME --template-body $TEMPLATE_FILE --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
+          fi
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
