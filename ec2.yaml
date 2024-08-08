@@ -1,3 +1,4 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
 Description: Create an EC2 instance, an S3 bucket, and an EMR Cluster
 
