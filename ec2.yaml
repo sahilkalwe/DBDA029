@@ -14,7 +14,7 @@ Resources:
   WebAppBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: vita1234-unique  # Ensure this bucket name is globally unique
+      BucketName: groupdata6 # Ensure this bucket name is globally unique
 
   # Example of adding an EMR Cluster
   MyEMRCluster:
